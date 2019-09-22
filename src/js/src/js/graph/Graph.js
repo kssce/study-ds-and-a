@@ -1,73 +1,7 @@
-const isExists = (...args) => (args.every(val => val !== null && val !== undefined));
-
-class Stack {
-  constructor() { this.arr = []; }
-
-  push = (item) => { this.arr.push(item) };
-
-  pop = () => this.arr.pop();
-
-  peek = () => {
-    const lastIdx = this.arr.length - 1;
-    return this.arr[lastIdx];
-  };
-
-  isEmpty = () => this.arr.length === 0;
-}
-
-class Queue {
-  constructor() { this.arr = []; }
-
-  enqueue = (item) => { this.arr.push(item) };
-
-  dequeue = () => this.arr.shift();
-
-  head = () => this.arr[0];
-
-  isEmpty = () => this.arr.length === 0;
-}
-
-
-class Node {
-  constructor (key = null, val = null) {
-    if (!isExists(key, val)) {
-      console.error('ket 혹은 val 값이 없습니다.');
-      return null;
-    }
-    this.key = key;
-    this.val = val;
-    this.visited = false;
-    this.adjList = [];
-  }
-
-  getKey = () => this.key;
-  getVal = () => this.val;
-  setKey = (key) => { this.key = key; };
-  setVal = (val) => { this.val = val; };
-
-  getAdjList = () => this.adjList;
-
-  linkNode = (targetNode) => {
-    const key = targetNode.getKey();
-    const alreadyExists = this.adjList.some(adjNode => adjNode.getKey() === key);
-
-    if (!alreadyExists) {
-      this.adjList.push(targetNode);
-      console.log(`${this.key} -> ${key}`);
-      targetNode.linkNode(this);
-      return true;
-    }
-    return false;
-  };
-
-  visit = () => {
-    console.log(`${this.key} 방문`);
-    // console.log(this.adjList.map(adj => adj.getKey()));
-    this.visited = true;
-  };
-
-  isVisited = () => this.visited;
-}
+import { isExists } from '../lib/helper';
+import Stack from '../basic/Stack';
+import Queue from '../basic/Queue';
+import Node from './Elem/VertexForBFS';
 
 class Graph {
   constructor() {

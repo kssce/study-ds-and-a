@@ -1,104 +1,77 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _helper = require("../lib/helper");
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+import { isNotNull } from '../lib/helper';
 
 // getKey를 통해 멤버 변수 key를 리턴하는 데이터 형(이터페이스)를 element 로 갖는다
 // getData를 통해 멤버 변수 data를 리턴하는 데이터 형(이터페이스)를 element 로 갖는다
-var UnionFind = function UnionFind(_elemSet) {
-  var _this = this;
+class UnionFind {
+  constructor(elemSet) {
+    this.parent = {};
+    this.height = {};
+    this.init(elemSet);
+  }
 
-  _classCallCheck(this, UnionFind);
-
-  this.init = function (elemSet) {
-    elemSet.forEach(function (item) {
-      _this.setParent(item.getKey());
-    });
+  init = (elemSet) => {
+    elemSet.forEach(item => { this.setParent(item.getKey()); });
   };
 
-  this.add = function (elem) {
-    var id = elem.getKey();
-    if ((0, _helper.isNotNull)(parent[id])) return;
+  add = (elem) => {
+    const id = elem.getKey();
+    if (isNotNull(parent[id])) return;
+
     parent[id] = id;
   };
 
-  this.setParent = function (id) {
-    var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    _this.parent[id] = id;
-    _this.height[id] = height;
+  setParent = (id, height = 0) => {
+    this.parent[id] = id;
+    this.height[id] = height;
   };
 
-  this.find = function (x) {
-    return _this.parent[x] === x ? x : _this.find(_this.parent[x]);
-  };
+  // O(lgN)
+  find = (x) => (this.parent[x] === x) ? x : this.find(this.parent[x]);
 
-  this.isFullArgs = function (x, y) {
-    return (0, _helper.isNotNull)(x) && (0, _helper.isNotNull)(y);
-  };
+  isFullArgs = (x, y) => (isNotNull(x) && isNotNull(y));
 
-  this.union = function (x, y) {
-    if (_this.areSetsTheseProc(x, y)) return;
+  // O(α(N)) (에커만 함수로, 2^65536일때 5가 된다. 상수라고 봐도 된다.)
+  union = (x, y) => {
+    if (this.areSetsTheseProc(x, y)) return;
     console.log('> union: ', x.getData(), ' and ', y.getData());
 
-    var _this$getRootForThese = _this.getRootForThese(x, y),
-        _this$getRootForThese2 = _slicedToArray(_this$getRootForThese, 2),
-        rootWithX = _this$getRootForThese2[0],
-        rootWithY = _this$getRootForThese2[1];
+    const [rootWithX, rootWithY] = this.getRootForThese(x, y);
+    const xHeight = this.height[rootWithX];
+    const yHeight = this.height[rootWithY];
 
-    var xHeight = _this.height[rootWithX];
-    var yHeight = _this.height[rootWithY];
+    if (xHeight > yHeight) { // x가 y보다 더 높으면 x에 y를 추가
+      this.parent[rootWithY] = rootWithX;
 
-    if (xHeight > yHeight) {
-      // x가 y보다 더 높으면 x에 y를 추가
-      _this.parent[rootWithY] = rootWithX;
     } else {
-      if (xHeight === yHeight) _this.height[rootWithY]++;
-      _this.parent[rootWithX] = rootWithY;
+      if (xHeight === yHeight) this.height[rootWithY]++;
+      this.parent[rootWithX] = rootWithY;
     }
   };
 
-  this.areSetsThese = function (x, y) {
-    if (!_this.isFullArgs(x, y)) return false;
-    return _this.areSetsTheseProc(x, y);
+  areSetsThese = (x, y) => {
+    if (!this.isFullArgs(x, y)) return false;
+    return this.areSetsTheseProc(x, y);
   };
 
-  this.areSetsTheseProc = function (x, y) {
-    var _this$getRootForThese3 = _this.getRootForThese(x, y),
-        _this$getRootForThese4 = _slicedToArray(_this$getRootForThese3, 2),
-        rootWithX = _this$getRootForThese4[0],
-        rootWithY = _this$getRootForThese4[1];
-
+  areSetsTheseProc = (x, y) => {
+    const [rootWithX, rootWithY] = this.getRootForThese(x, y);
     return rootWithX === rootWithY;
   };
 
-  this.getRootForThese = function (x, y) {
-    var rootWithX = _this.find(x.getKey());
-
-    var rootWithY = _this.find(y.getKey());
-
+  getRootForThese = (x, y) => {
+    const rootWithX = this.find(x.getKey());
+    const rootWithY = this.find(y.getKey());
     return [rootWithX, rootWithY];
   };
 
-  this.parent = {};
-  this.height = {};
-  this.init(_elemSet);
-};
+}
 
-var _default = UnionFind; // [ 초기 객체 버전 ]
+
+export default UnionFind;
+
+
+
+// [ 초기 객체 버전 ]
 // class UnionFind {
 //   constructor(elemSet, key) {
 //     this.parent = {};
@@ -185,6 +158,7 @@ var _default = UnionFind; // [ 초기 객체 버전 ]
 //     data: 'structure',
 //   },
 // ];
+
 // const u = new UnionFind(dummyList, 'offset');
 // u.union(dummyList[0], dummyList[1]);
 // console.log(`${dummyList[0].data} and ${dummyList[1].data} sets ? ${u.areSetsThese(dummyList[0], dummyList[1])}`);
@@ -194,5 +168,3 @@ var _default = UnionFind; // [ 초기 객체 버전 ]
 // u.union(dummyList[1], dummyList[4]);
 // console.log(`${dummyList[0].data} and ${dummyList[2].data} sets ? ${u.areSetsThese(dummyList[1], dummyList[2])}`);
 // console.log(`${dummyList[3].data} and ${dummyList[4].data} sets ? ${u.areSetsThese(dummyList[3], dummyList[4])}`);
-
-exports["default"] = _default;
