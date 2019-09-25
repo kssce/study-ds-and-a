@@ -17,6 +17,6 @@
 - Kruskal
 - Prim
 - Dijkstra (todo)
-- bellman ford (todo)
+- Bellman ford (todo)
 
-- b-tree (todo)
+- B-Tree (todo)
