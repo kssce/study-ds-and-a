@@ -1,9 +1,5 @@
 package datastructure.application;
 
-/**
- * convertor by recursion
- * 재귀를 이용한 진수 변환기
- */
 public class NumConv {
 
     private static String convHex (int num, int convNum) {

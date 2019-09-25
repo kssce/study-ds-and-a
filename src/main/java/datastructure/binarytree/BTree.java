@@ -3,6 +3,7 @@ package datastructure.binarytree;
 
 import lib.Constant;
 
+// Binary Search Tree (Not BTree)
 public class BTree<T extends Comparable<T>> {
     private Node<T> root;
     private SearchMethod strategyToSearch;
