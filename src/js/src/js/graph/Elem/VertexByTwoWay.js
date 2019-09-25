@@ -1,6 +1,6 @@
 import { isExists } from '../../lib/helper';
 
-class VertexForBFS {
+class VertexByTwoWay {
   constructor (key = null, val = null) {
     if (!isExists(key, val)) {
       console.error('key 혹은 val 값이 없습니다.');
@@ -41,4 +41,4 @@ class VertexForBFS {
   isVisited = () => this.visited;
 }
 
-export default VertexForBFS;
+export default VertexByTwoWay;

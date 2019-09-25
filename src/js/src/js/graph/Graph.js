@@ -1,7 +1,7 @@
 import { isExists } from '../lib/helper';
 import Stack from '../basic/Stack';
 import Queue from '../basic/Queue';
-import Node from './Elem/VertexForBFS';
+import Node from './Elem/VertexByTwoWay';
 
 class Graph {
   constructor() {

@@ -6,7 +6,7 @@ var _Stack = _interopRequireDefault(require("../basic/Stack"));
 
 var _Queue = _interopRequireDefault(require("../basic/Queue"));
 
-var _VertexForBFS = _interopRequireDefault(require("./Elem/VertexForBFS"));
+var _VertexByTwoWay = _interopRequireDefault(require("./Elem/VertexByTwoWay"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -53,13 +53,13 @@ var Graph = function Graph() {
 
   this.init = function (nodeMap) {
     console.log('---------------------------------');
-    var A = new _VertexForBFS["default"]('A', 1);
-    var B = new _VertexForBFS["default"]('B', 2);
-    var C = new _VertexForBFS["default"]('C', 3);
-    var D = new _VertexForBFS["default"]('D', 4);
-    var E = new _VertexForBFS["default"]('E', 5);
-    var F = new _VertexForBFS["default"]('F', 6);
-    var G = new _VertexForBFS["default"]('G', 7);
+    var A = new _VertexByTwoWay["default"]('A', 1);
+    var B = new _VertexByTwoWay["default"]('B', 2);
+    var C = new _VertexByTwoWay["default"]('C', 3);
+    var D = new _VertexByTwoWay["default"]('D', 4);
+    var E = new _VertexByTwoWay["default"]('E', 5);
+    var F = new _VertexByTwoWay["default"]('F', 6);
+    var G = new _VertexByTwoWay["default"]('G', 7);
     A.linkNode(B);
     A.linkNode(C);
     A.linkNode(D);
