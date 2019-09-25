@@ -16,8 +16,7 @@ var Stack = function Stack() {
   };
 
   this.peek = function () {
-    var lastIdx = _this.arr.length - 1;
-    return _this.arr[lastIdx];
+    return _this.arr[_this.arr.length - 1];
   };
 
   this.isEmpty = function () {

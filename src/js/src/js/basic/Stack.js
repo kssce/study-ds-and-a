@@ -5,10 +5,7 @@ class Stack {
 
   pop = () => this.arr.pop();
 
-  peek = () => {
-    const lastIdx = this.arr.length - 1;
-    return this.arr[lastIdx];
-  };
+  peek = () => this.arr[this.arr.length - 1];
 
   isEmpty = () => this.arr.length === 0;
 }

@@ -1,3 +1,5 @@
+// todo 아직 미구현
+
 const M = 5;
 
 function initChild (list) {

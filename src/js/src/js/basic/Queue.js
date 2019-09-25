@@ -5,8 +5,6 @@ class Queue {
 
   dequeue = () => this.arr.shift();
 
-  head = () => this.arr[0];
-
   isEmpty = () => this.arr.length === 0;
 }
 

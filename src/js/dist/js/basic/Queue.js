@@ -20,10 +20,6 @@ var Queue = function Queue() {
     return _this.arr.shift();
   };
 
-  this.head = function () {
-    return _this.arr[0];
-  };
-
   this.isEmpty = function () {
     return _this.arr.length === 0;
   };
