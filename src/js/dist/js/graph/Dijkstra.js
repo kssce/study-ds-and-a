@@ -109,22 +109,6 @@ var Dijkstra = function Dijkstra(vertexList) {
     }); // 오름차순 (a < b)
   };
 
-  this.linkToTree = function (prevVertex, currVertex) {
-    if (!prevVertex) return;
-    var newPrevVertex = new _VertexByOneWay2["default"](prevVertex.getKey(), prevVertex.getVal());
-    var newCurrVertex = new _VertexByOneWay2["default"](currVertex.getKey(), currVertex.getVal());
-    newPrevVertex.linkNode(newCurrVertex);
-  };
-
-  this.enqueueUnvisitedVertexToPQueue = function (currVertex) {
-    var adjList = currVertex.getAdjList();
-    adjList.forEach(function (adjEdge) {
-      if (!adjEdge.getCurrVertex().isVisited()) {
-        _this3.vertexPQ.enqueue(adjEdge);
-      }
-    });
-  };
-
   this.getByBFS = function (startVertex) {
     _this3.init(startVertex);
 
@@ -166,6 +150,10 @@ var Dijkstra = function Dijkstra(vertexList) {
     return _this3.costMap;
   };
 
+  this.getByPQ = function (startVertex) {
+    _this3.init();
+  };
+
   this.printPath = function (costMap) {
     console.log(_lodash["default"].map(costMap, function (vertex, key) {
       var rstStr = '';
@@ -180,10 +168,6 @@ var Dijkstra = function Dijkstra(vertexList) {
       if (vertex.val === Infinity) rstStr = ' is broken';
       return "total cost is ".concat(vertex.val, " : ").concat(key).concat(rstStr);
     }).join('\n'));
-  };
-
-  this.getByPQ = function (startVertex) {
-    _this3.init();
   };
 
   this.vertexList = vertexList;

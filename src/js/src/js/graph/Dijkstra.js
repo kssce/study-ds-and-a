@@ -58,24 +58,6 @@ class Dijkstra {
     this.vertexPQ = new PQueue(100, (a, b) => (a.compareTo(b) < 0)); // 오름차순 (a < b)
   };
 
-  linkToTree = (prevVertex, currVertex) => {
-    if (!prevVertex) return;
-
-    const newPrevVertex = new VertexByOneWay(prevVertex.getKey(), prevVertex.getVal());
-    const newCurrVertex = new VertexByOneWay(currVertex.getKey(), currVertex.getVal());
-    newPrevVertex.linkNode(newCurrVertex);
-  };
-
-  enqueueUnvisitedVertexToPQueue = (currVertex) => {
-    const adjList = currVertex.getAdjList();
-
-    adjList.forEach(adjEdge => {
-      if (!adjEdge.getCurrVertex().isVisited()) {
-        this.vertexPQ.enqueue(adjEdge);
-      }
-    });
-  };
-
   getByBFS = (startVertex) => {
     this.init(startVertex);
     this.unvisitedQ.enqueue(new Edge(null, startVertex, 0));
@@ -108,6 +90,11 @@ class Dijkstra {
     return this.costMap;
   };
 
+  getByPQ = (startVertex) => {
+    this.init();
+
+  };
+
   printPath = (costMap) => {
     console.log(
       _.map(costMap, (vertex, key) => {
@@ -122,11 +109,6 @@ class Dijkstra {
         return `total cost is ${vertex.val} : ${key}${rstStr}`;
       }).join('\n')
     );
-  };
-
-  getByPQ = (startVertex) => {
-    this.init();
-
   };
 }
 
