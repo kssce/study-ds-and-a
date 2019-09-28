@@ -1,25 +1,21 @@
 import { isExists } from '../../lib/helper';
 
 class VertexByOneWay {
-  constructor (key = null, val = null, linkedCost = null) {
+  constructor (key = null, val = null, cost = null) {
     if (!isExists(key, val)) {
       console.error('key 혹은 val 값이 없습니다.');
       return null;
     }
     this.key = key;
     this.val = val;
-    this.linkedCost = linkedCost;
     this.visited = false;
     this.adjList = [];
   }
 
   getKey = () => this.key;
   getVal = () => this.val;
-  getLinkedCost = () => this.linkedCost;
   setKey = (key) => { this.key = key; };
   setVal = (val) => { this.val = val; };
-  setLinkedCost = (linkedCost) => { this.linkedCost = linkedCost };
-
   getAdjList = () => this.adjList;
 
   linkVertex = (targetVertex) => {

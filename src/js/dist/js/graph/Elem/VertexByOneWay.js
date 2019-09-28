@@ -16,7 +16,7 @@ var VertexByOneWay = function VertexByOneWay() {
 
   var _val = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
-  var _linkedCost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var cost = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
   _classCallCheck(this, VertexByOneWay);
 
@@ -28,20 +28,12 @@ var VertexByOneWay = function VertexByOneWay() {
     return _this.val;
   };
 
-  this.getLinkedCost = function () {
-    return _this.linkedCost;
-  };
-
   this.setKey = function (key) {
     _this.key = key;
   };
 
   this.setVal = function (val) {
     _this.val = val;
-  };
-
-  this.setLinkedCost = function (linkedCost) {
-    _this.linkedCost = linkedCost;
   };
 
   this.getAdjList = function () {
@@ -84,7 +76,6 @@ var VertexByOneWay = function VertexByOneWay() {
 
   this.key = _key;
   this.val = _val;
-  this.linkedCost = _linkedCost;
   this.visited = false;
   this.adjList = [];
 };

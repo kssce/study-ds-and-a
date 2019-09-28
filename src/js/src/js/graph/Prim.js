@@ -83,7 +83,7 @@ class Prim {
   };
 }
 
-// VertexByOneWay
+
 
 // [ Test code ]
 console.log('----------- [ 초기화 ] ------------');

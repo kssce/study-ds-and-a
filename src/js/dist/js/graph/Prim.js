@@ -138,8 +138,7 @@ var Prim = function Prim() {
   this.vertexPQ = new _PQueue["default"](100, function (a, b) {
     return a.compareTo(b) < 0;
   }); // 오름차순 (a < b)
-}; // VertexByOneWay
-// [ Test code ]
+}; // [ Test code ]
 
 
 console.log('----------- [ 초기화 ] ------------');
