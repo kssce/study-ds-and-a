@@ -83,7 +83,7 @@ class Dijkstra {
       const edge = new Edge(null, v, Infinity);
       this.costMap[v.getKey()] = edge;
       this.unvisitedSet.push(edge);
-    }); // { val: Infinity, prev: null } });
+    });
   };
 
   getByBFS = (startVertex) => {

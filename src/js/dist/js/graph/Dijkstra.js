@@ -147,8 +147,7 @@ var Dijkstra = function Dijkstra(vertexList) {
       _this4.costMap[v.getKey()] = edge;
 
       _this4.unvisitedSet.push(edge);
-    }); // { val: Infinity, prev: null } });
-
+    });
   };
 
   this.getByBFS = function (startVertex) {
