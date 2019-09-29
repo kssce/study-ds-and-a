@@ -16,7 +16,9 @@
 - UnionFind
 - Kruskal
 - Prim
-- Dijkstra (todo)
-- Bellman ford (todo)
+- Dijkstra
+  - by array graph
+  - by linked list 
+- A start (todo)
 
 - B-Tree (todo)
