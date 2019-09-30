@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Queue from '../basic/Queue';
+import Edge from './Elem/Edge2';
 import PQueue from '../basic/PQueue';
 import VertexByOneWay from './Elem/VertexByOneWay';
 
@@ -29,20 +29,6 @@ class SetByMin {
 
 
 
-class Edge {
-  constructor (prevVertex, currVertex, cost) {
-    this.prevVertex = prevVertex; // sVertex: 시작 정점 (출발지)
-    this.currVertex = currVertex; // eVertex: 종료 정점 (목적지)
-    this.cost = cost;
-  }
-  getPrevVertex = () => this.prevVertex;
-  setPrevVertex = (vertex) => { this.prevVertex = vertex };
-  getCurrVertex = () => this.currVertex;
-  getCost = () => this.cost;
-  setCost = (cost) => { this.cost = cost };
-  compareTo = (target) => this.cost - target.getCost();
-}
-
 class Vertex extends VertexByOneWay {
   constructor (key, val) {
     super(key, val);
@@ -68,9 +54,9 @@ class Vertex extends VertexByOneWay {
 class Dijkstra {
   constructor (vertexList) {
     this.vertexList = vertexList;
-    this.costMap = null; // { [key]: Edge,}
+    this.costMap = null; // Map with shortest cost each node
     this.unvisitedSet = null;
-    this.vertexPQ = null;
+    this.pQ = null;
     this.init();
   }
 

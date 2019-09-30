@@ -2,7 +2,7 @@
 
 var _lodash = _interopRequireDefault(require("lodash"));
 
-var _Queue = _interopRequireDefault(require("../basic/Queue"));
+var _Edge = _interopRequireDefault(require("./Elem/Edge2"));
 
 var _PQueue = _interopRequireDefault(require("../basic/PQueue"));
 
@@ -57,106 +57,70 @@ var SetByMin = function SetByMin(getter) {
   this.getter = getter;
 };
 
-var Edge = function Edge(prevVertex, currVertex, _cost) {
-  var _this2 = this;
-
-  _classCallCheck(this, Edge);
-
-  this.getPrevVertex = function () {
-    return _this2.prevVertex;
-  };
-
-  this.setPrevVertex = function (vertex) {
-    _this2.prevVertex = vertex;
-  };
-
-  this.getCurrVertex = function () {
-    return _this2.currVertex;
-  };
-
-  this.getCost = function () {
-    return _this2.cost;
-  };
-
-  this.setCost = function (cost) {
-    _this2.cost = cost;
-  };
-
-  this.compareTo = function (target) {
-    return _this2.cost - target.getCost();
-  };
-
-  this.prevVertex = prevVertex; // sVertex: 시작 정점 (출발지)
-
-  this.currVertex = currVertex; // eVertex: 종료 정점 (목적지)
-
-  this.cost = _cost;
-};
-
 var Vertex =
 /*#__PURE__*/
 function (_VertexByOneWay) {
   _inherits(Vertex, _VertexByOneWay);
 
   function Vertex(_key, val) {
-    var _this3;
+    var _this2;
 
     _classCallCheck(this, Vertex);
 
-    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Vertex).call(this, _key, val));
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Vertex).call(this, _key, val));
 
-    _this3.link = function (targetVertex, cost) {
+    _this2.link = function (targetVertex, cost) {
       var key = targetVertex.getKey();
 
-      var alreadyExists = _this3.adjList.some(function (adjEdge) {
+      var alreadyExists = _this2.adjList.some(function (adjEdge) {
         return adjEdge.getCurrVertex().getKey() === key;
       });
 
       if (!alreadyExists) {
-        _this3.adjList.push(new Edge(_assertThisInitialized(_this3), targetVertex, cost));
+        _this2.adjList.push(new _Edge["default"](_assertThisInitialized(_this2), targetVertex, cost));
 
-        console.log("".concat(_this3.key, " -> ").concat(key));
+        console.log("".concat(_this2.key, " -> ").concat(key));
         return true;
       }
 
       return false;
     };
 
-    return _this3;
+    return _this2;
   }
 
   return Vertex;
 }(_VertexByOneWay2["default"]);
 
 var Dijkstra = function Dijkstra(vertexList) {
-  var _this4 = this;
+  var _this3 = this;
 
   _classCallCheck(this, Dijkstra);
 
   this.init = function () {
-    _this4.costMap = {};
-    _this4.unvisitedSet = new SetByMin(function (data) {
+    _this3.costMap = {};
+    _this3.unvisitedSet = new SetByMin(function (data) {
       return data.getCost();
     });
-    _this4.pQ = new _PQueue["default"](100, function (a, b) {
+    _this3.pQ = new _PQueue["default"](100, function (a, b) {
       return a.compareTo(b) < 0;
     }); // 오름차순 (a < b)
 
-    _this4.vertexList.forEach(function (v) {
-      var edge = new Edge(null, v, Infinity);
-      _this4.costMap[v.getKey()] = edge;
+    _this3.vertexList.forEach(function (v) {
+      var edge = new _Edge["default"](null, v, Infinity);
+      _this3.costMap[v.getKey()] = edge;
 
-      _this4.unvisitedSet.push(edge);
+      _this3.unvisitedSet.push(edge);
     });
   };
 
   this.getByBFS = function (startVertex) {
-    _this4.init(startVertex);
+    _this3.init(startVertex);
 
-    _this4.costMap[startVertex.getKey()].setCost(0);
+    _this3.costMap[startVertex.getKey()].setCost(0);
 
     var _loop = function _loop() {
-      var currEdge = _this4.unvisitedSet.popByMin();
+      var currEdge = _this3.unvisitedSet.popByMin();
 
       var currVertex = currEdge.getCurrVertex();
       if (currVertex.isVisited()) return "continue";
@@ -164,37 +128,37 @@ var Dijkstra = function Dijkstra(vertexList) {
       curAdjList.forEach(function (adjEdge) {
         var nextVertex = adjEdge.getCurrVertex();
 
-        var shortestNextCost = _this4.costMap[nextVertex.getKey()].getCost();
+        var shortestNextCost = _this3.costMap[nextVertex.getKey()].getCost();
 
-        var accCurrCost = adjEdge.getCost() + _this4.costMap[currVertex.getKey()].getCost();
+        var accCurrCost = adjEdge.getCost() + _this3.costMap[currVertex.getKey()].getCost();
 
         if (accCurrCost < shortestNextCost) {
-          _this4.costMap[nextVertex.getKey()].setCost(accCurrCost);
+          _this3.costMap[nextVertex.getKey()].setCost(accCurrCost);
 
-          _this4.costMap[nextVertex.getKey()].setPrevVertex(currVertex);
+          _this3.costMap[nextVertex.getKey()].setPrevVertex(currVertex);
         }
       });
       currVertex.visit();
     };
 
-    while (!_this4.unvisitedSet.isEmpty()) {
+    while (!_this3.unvisitedSet.isEmpty()) {
       var _ret = _loop();
 
       if (_ret === "continue") continue;
     }
 
-    return _this4.costMap;
+    return _this3.costMap;
   };
 
   this.getByPQ = function (startVertex) {
-    _this4.init(startVertex);
+    _this3.init(startVertex);
 
-    _this4.pQ.enqueue(new Edge(null, startVertex, 0));
+    _this3.pQ.enqueue(new _Edge["default"](null, startVertex, 0));
 
-    _this4.costMap[startVertex.getKey()].setCost(0);
+    _this3.costMap[startVertex.getKey()].setCost(0);
 
     var _loop2 = function _loop2() {
-      var currEdge = _this4.pQ.dequeue();
+      var currEdge = _this3.pQ.dequeue();
 
       var currVertex = currEdge.getCurrVertex();
       if (currVertex.isVisited()) return "continue";
@@ -202,30 +166,30 @@ var Dijkstra = function Dijkstra(vertexList) {
       curAdjList.forEach(function (adjEdge) {
         var nextVertex = adjEdge.getCurrVertex();
 
-        var shortestNextCost = _this4.costMap[nextVertex.getKey()].getCost();
+        var shortestNextCost = _this3.costMap[nextVertex.getKey()].getCost();
 
-        var accCurrCost = adjEdge.getCost() + _this4.costMap[currVertex.getKey()].getCost();
+        var accCurrCost = adjEdge.getCost() + _this3.costMap[currVertex.getKey()].getCost();
 
         if (accCurrCost < shortestNextCost) {
-          _this4.costMap[nextVertex.getKey()].setCost(accCurrCost);
+          _this3.costMap[nextVertex.getKey()].setCost(accCurrCost);
 
-          _this4.costMap[nextVertex.getKey()].setPrevVertex(currVertex);
+          _this3.costMap[nextVertex.getKey()].setPrevVertex(currVertex);
 
           if (!nextVertex.isVisited()) {
-            _this4.pQ.enqueue(adjEdge);
+            _this3.pQ.enqueue(adjEdge);
           }
         }
       });
       currVertex.visit();
     };
 
-    while (!_this4.pQ.isEmpty()) {
+    while (!_this3.pQ.isEmpty()) {
       var _ret2 = _loop2();
 
       if (_ret2 === "continue") continue;
     }
 
-    return _this4.costMap;
+    return _this3.costMap;
   };
 
   this.printPath = function (costMap) {
@@ -245,10 +209,10 @@ var Dijkstra = function Dijkstra(vertexList) {
   };
 
   this.vertexList = vertexList;
-  this.costMap = null; // { [key]: Edge,}
+  this.costMap = null; // Map with shortest cost each node
 
   this.unvisitedSet = null;
-  this.vertexPQ = null;
+  this.pQ = null;
   this.init();
 }; // [ Test code ]
 

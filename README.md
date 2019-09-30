@@ -19,6 +19,5 @@
 - Dijkstra
   - by array graph
   - by linked list 
-- A start (todo)
-
+- A start
 - B-Tree (todo)
