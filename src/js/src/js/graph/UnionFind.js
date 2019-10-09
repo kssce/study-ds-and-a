@@ -1,7 +1,7 @@
 import { isNotNull } from '../lib/helper';
 
-// getKey를 통해 멤버 변수 key를 리턴하는 데이터 형(이터페이스)를 element 로 갖는다
-// getData를 통해 멤버 변수 data를 리턴하는 데이터 형(이터페이스)를 element 로 갖는다
+// element has a data type that returns a member variable key by getKey
+// element has a data type that returns a member variable data by getData
 class UnionFind {
   constructor(elemSet) {
     this.parent = {};
@@ -30,7 +30,7 @@ class UnionFind {
 
   isFullArgs = (x, y) => (isNotNull(x) && isNotNull(y));
 
-  // O(α(N)) (에커만 함수로, 2^65536일때 5가 된다. 상수라고 봐도 된다.)
+  // O(α(N)) (ackermann function, 2^65536 == 5. like constant)
   union = (x, y) => {
     if (this.areSetsTheseProc(x, y)) return;
     console.log('> union: ', x.getData(), ' and ', y.getData());
@@ -39,7 +39,7 @@ class UnionFind {
     const xHeight = this.height[rootWithX];
     const yHeight = this.height[rootWithY];
 
-    if (xHeight > yHeight) { // x가 y보다 더 높으면 x에 y를 추가
+    if (xHeight > yHeight) { // if xHeight > yHeight then insertion y to set of x
       this.parent[rootWithY] = rootWithX;
 
     } else {
@@ -71,7 +71,7 @@ export default UnionFind;
 
 
 
-// [ 초기 객체 버전 ]
+// [ version by object ]
 // class UnionFind {
 //   constructor(elemSet, key) {
 //     this.parent = {};

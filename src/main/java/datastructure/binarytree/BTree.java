@@ -82,7 +82,7 @@ public class BTree<T extends Comparable<T>> {
         Node<T> node = nodeInfo.getNode();
 
         if (node == null) {
-            System.out.println("삭제: " + data + "는(은) 트리에 존재하지 않습니다.");
+            System.out.println("Delete: " + data + " does not exist in the tree.");
             return;
         }
 

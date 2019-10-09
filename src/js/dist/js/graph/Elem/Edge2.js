@@ -36,9 +36,9 @@ var Edge = function Edge(prevVertex, currVertex, _cost) {
     return _this.cost - target.getCost();
   };
 
-  this.prevVertex = prevVertex; // sVertex: 시작 정점 (출발지)
+  this.prevVertex = prevVertex; // start vertex
 
-  this.currVertex = currVertex; // eVertex: 종료 정점 (목적지)
+  this.currVertex = currVertex; // end vertex
 
   this.cost = _cost;
 };

@@ -75,5 +75,5 @@ var EDGE_LIST = Object.freeze([new _Edge["default"](V_A, V_B, 3), new _Edge["def
 var VERTEX_LIST = Object.freeze([V_A, V_B, V_C, V_D, V_E, V_F, V_G]);
 var k = new Kruskal(EDGE_LIST, VERTEX_LIST);
 var mst = k.MST();
-console.log('----------- [ 이하 실행 결과 ] ------------');
+console.log('----------- [ Result ] ------------');
 console.log(mst);

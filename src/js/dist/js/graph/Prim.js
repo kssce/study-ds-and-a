@@ -165,11 +165,11 @@ V_C.link(V_G, 4);
 V_H.link(V_G, 3);
 var p = new Prim();
 var startVertex = V_A;
-console.log('----------- [ 과정 ] ------------');
+console.log('----------- [ Process ] ------------');
 
 var _p$MST = p.MST(startVertex),
     tree = _p$MST.tree,
     totalCost = _p$MST.totalCost;
 
-console.log('----------- [ 실행 결과 ] ------------');
+console.log('----------- [ Result ] ------------');
 console.log(" > totalCost: ".concat(totalCost));

@@ -112,8 +112,8 @@ V_H.link(V_G, 3);
 
 const p = new Prim();
 const startVertex = V_A;
-console.log('----------- [ 과정 ] ------------');
+console.log('----------- [ Process ] ------------');
 const { tree, totalCost } = p.MST(startVertex);
 
-console.log('----------- [ 실행 결과 ] ------------');
+console.log('----------- [ Result ] ------------');
 console.log(` > totalCost: ${totalCost}`);

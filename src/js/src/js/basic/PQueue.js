@@ -3,9 +3,9 @@ const parent = i => Math.floor((i + 1) / 2) - 1;
 const left = i => (i * 2) + 1;
 const right = i => (i + 1) * 2;
 
-// 우선순위 큐
+// Priority Queue
 class PQueue {
-  constructor (maxSize = 10, comparator = (a, b) => (a > b)) { // a > b === 내림차순
+  constructor (maxSize = 10, comparator = (a, b) => (a > b)) { // a > b is order by descending
     this.data = [];
     this.maxSize = maxSize;
     this.comparator = comparator;

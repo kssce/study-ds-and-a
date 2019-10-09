@@ -1,15 +1,12 @@
 package datastructure.binarytree.avl;
 
-
 import datastructure.binarytree.CommandForNode;
 import datastructure.binarytree.CommandPrint;
 import datastructure.binarytree.SearchMethod;
-import lib.Constant;
 
 public class AvlTree<T extends Comparable<T>> {
     private NodeForAvl<T> root;
     private SearchMethod<T> strategyToSearch;
-    private final int LEFT = Constant.LEFT, RIGHT = Constant.RIGHT, NONE = Constant.NONE;
 
     public void setSearchMethod (SearchMethod strategyToSearch) {
         this.strategyToSearch = strategyToSearch;
@@ -41,7 +38,7 @@ public class AvlTree<T extends Comparable<T>> {
             node.setLeft(insertProc(node.getLeft(), data));
 
         } else { // node.data == data
-            System.out.println("같은 값은 삽입할 수 없습니다.");
+            System.out.println("You cannot insert a duplicated value.");
             return node;
         }
 

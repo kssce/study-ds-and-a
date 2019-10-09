@@ -17,8 +17,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// getKey를 통해 멤버 변수 key를 리턴하는 데이터 형(이터페이스)를 element 로 갖는다
-// getData를 통해 멤버 변수 data를 리턴하는 데이터 형(이터페이스)를 element 로 갖는다
+// element has a data type that returns a member variable key by getKey
+// element has a data type that returns a member variable data by getData
 var UnionFind = function UnionFind(_elemSet) {
   var _this = this;
 
@@ -63,7 +63,7 @@ var UnionFind = function UnionFind(_elemSet) {
     var yHeight = _this.height[rootWithY];
 
     if (xHeight > yHeight) {
-      // x가 y보다 더 높으면 x에 y를 추가
+      // if xHeight > yHeight then insertion y to set of x
       _this.parent[rootWithY] = rootWithX;
     } else {
       if (xHeight === yHeight) _this.height[rootWithY]++;
@@ -98,7 +98,7 @@ var UnionFind = function UnionFind(_elemSet) {
   this.init(_elemSet);
 };
 
-var _default = UnionFind; // [ 초기 객체 버전 ]
+var _default = UnionFind; // [ version by object ]
 // class UnionFind {
 //   constructor(elemSet, key) {
 //     this.parent = {};

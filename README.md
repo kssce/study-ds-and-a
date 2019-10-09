@@ -4,7 +4,6 @@
 - Binary Search Tree
 - AVL Tree
 - Number Converter
-
 - Red Black (todo)
 
 ### Javascript

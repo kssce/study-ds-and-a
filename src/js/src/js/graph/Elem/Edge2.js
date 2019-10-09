@@ -1,7 +1,7 @@
 class Edge {
   constructor (prevVertex, currVertex, cost) {
-    this.prevVertex = prevVertex; // sVertex: 시작 정점 (출발지)
-    this.currVertex = currVertex; // eVertex: 종료 정점 (목적지)
+    this.prevVertex = prevVertex; // start vertex
+    this.currVertex = currVertex; // end vertex
     this.cost = cost;
   }
   getPrevVertex = () => this.prevVertex;

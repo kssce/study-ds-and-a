@@ -59,5 +59,5 @@ const VERTEX_LIST = Object.freeze([ V_A, V_B, V_C, V_D, V_E, V_F, V_G ]);
 
 const k = new Kruskal(EDGE_LIST, VERTEX_LIST);
 const mst = k.MST();
-console.log('----------- [ 이하 실행 결과 ] ------------');
+console.log('----------- [ Result ] ------------');
 console.log(mst);

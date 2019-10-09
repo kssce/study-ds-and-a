@@ -48,7 +48,7 @@ var VertexByOneWay = function VertexByOneWay() {
     });
 
     if (!alreadyExists) {
-      // key가 유일하다면 adjVertex 를 해시테이블로 구현할 것
+      // todo Implement adjVertex as a hashtable if the key is unique.
       _this.adjList.push(targetVertex);
 
       console.log("".concat(_this.key, " -> ").concat(key)); // targetVertex.linkNode(this);
@@ -60,7 +60,7 @@ var VertexByOneWay = function VertexByOneWay() {
   };
 
   this.visit = function () {
-    console.log("".concat(_this.key, " \uBC29\uBB38")); // console.log(this.adjList.map(adj => adj.getKey()));
+    console.log("".concat(_this.key, " is visited")); // console.log(this.adjList.map(adj => adj.getKey()));
 
     _this.visited = true;
   };
@@ -70,7 +70,7 @@ var VertexByOneWay = function VertexByOneWay() {
   };
 
   if (!(0, _helper.isExists)(_key, _val)) {
-    console.error('key 혹은 val 값이 없습니다.');
+    console.error('not exists key or val.');
     return null;
   }
 

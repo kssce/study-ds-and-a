@@ -57,7 +57,7 @@ var VertexByTwoWay = function VertexByTwoWay() {
   };
 
   this.visit = function () {
-    console.log("".concat(_this.key, " \uBC29\uBB38")); // console.log(this.adjList.map(adj => adj.getKey()));
+    console.log("".concat(_this.key, " is visited")); // console.log(this.adjList.map(adj => adj.getKey()));
 
     _this.visited = true;
   };
@@ -67,7 +67,7 @@ var VertexByTwoWay = function VertexByTwoWay() {
   };
 
   if (!(0, _helper.isExists)(_key, _val)) {
-    console.error('key 혹은 val 값이 없습니다.');
+    console.error('not exists key or val.');
     return null;
   }
 

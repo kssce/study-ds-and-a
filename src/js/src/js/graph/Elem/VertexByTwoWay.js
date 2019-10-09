@@ -3,7 +3,7 @@ import { isExists } from '../../lib/helper';
 class VertexByTwoWay {
   constructor (key = null, val = null) {
     if (!isExists(key, val)) {
-      console.error('key 혹은 val 값이 없습니다.');
+      console.error('not exists key or val.');
       return null;
     }
     this.key = key;
@@ -33,7 +33,7 @@ class VertexByTwoWay {
   };
 
   visit = () => {
-    console.log(`${this.key} 방문`);
+    console.log(`${this.key} is visited`);
     // console.log(this.adjList.map(adj => adj.getKey()));
     this.visited = true;
   };

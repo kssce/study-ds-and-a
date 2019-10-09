@@ -27,7 +27,7 @@ var left = function left(i) {
 
 var right = function right(i) {
   return (i + 1) * 2;
-}; // 우선순위 큐
+}; // Priority Queue
 
 
 var PQueue = function PQueue() {
@@ -143,7 +143,7 @@ var PQueue = function PQueue() {
     _this.data.push(tempData);
   };
 
-  // a > b === 내림차순
+  // a > b is order by descending
   this.data = [];
   this.maxSize = maxSize;
   this.comparator = comparator;
