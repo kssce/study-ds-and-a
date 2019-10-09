@@ -16,8 +16,8 @@
 - UnionFind
 - Kruskal
 - Prim
-- Dijkstra
+- Dijkstra by one way
   - by array graph
   - by linked list 
-- A start
+- A start by two way
 - B-Tree (todo)

@@ -2,7 +2,7 @@
   "name": "js",
   "version": "1.0.0",
   "description": "",
-  "main": "src/BTree.js",
+  "main": "src/js/tree/BTree.js",
   "scripts": {
     "build": "babel src/js -w -d dist/js",
     "test": "echo \"Error: no test specified\" && exit 1",
