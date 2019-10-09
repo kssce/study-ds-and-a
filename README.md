@@ -5,7 +5,7 @@
 - AVL Tree
 - Number Converter
 
-- red-black (todo)
+- Red Black (todo)
 
 ### Javascript
 - Stack
@@ -19,5 +19,8 @@
 - Dijkstra by one way
   - by array graph
   - by linked list 
-- A start by two way
-- B-Tree (todo)
+- A Start by two way
+- B-Tree
+  - insertion
+  - deletion (todo)
+- B+Tree (todo)
