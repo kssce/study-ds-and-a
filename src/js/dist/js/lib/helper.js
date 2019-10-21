@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.isExists = exports.isNotNull = void 0;
+exports.isNotExist = exports.isExists = exports.isNotNull = void 0;
 
 var isNotNull = function isNotNull(x) {
   return x !== null && x !== undefined;
@@ -22,3 +22,9 @@ var isExists = function isExists() {
 };
 
 exports.isExists = isExists;
+
+var isNotExist = function isNotExist(x) {
+  return x === null || x === undefined;
+};
+
+exports.isNotExist = isNotExist;
