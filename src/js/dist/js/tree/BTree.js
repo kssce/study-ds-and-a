@@ -249,6 +249,10 @@ var BTreeNode = function BTreeNode() {
     };
   };
 
+  this.isUnderflow = function () {
+    return _this._dataCnt < getT(_this._dim);
+  };
+
   this.toString = function () {
     return "parent is ".concat(_this._parent ? _this._parent.getData().toString() : 'null', ", data is ").concat(_this._data.toString(), " idx from parent is ").concat(_this._idxFromParent);
   };
@@ -384,44 +388,34 @@ var BTree = function BTree() {
       } else {
         _this2._root = changedNode;
       }
-    } // todo 중간 노드 삭제시 좌측이나 우측의 리프에서 데이터 가져와서 삭제하는 것 성공
-    // todo 문제는 자식을 병합해서 루트나 부모노드까지 바꾸기는 성공했으나
-    // todo 자식의 자식(CC)은 병합되지 않았으며, 병합할 경우 CC는 overflow 발생...
+    } // console.log('>> P >   ', pNode && pNode._data, pNode && pNode.getChildren().map(c=>c&&c._data));
+    // console.log('>> R >   ', changedNode && changedNode._data, changedNode && changedNode.getChildren().map(c=>c&&c._data));
 
-
-    console.log('>> P >   ', pNode && pNode._data, pNode && pNode.getChildren().map(function (c) {
-      return c && c._data;
-    }));
-    console.log('>> R >   ', changedNode && changedNode._data, changedNode && changedNode.getChildren().map(function (c) {
-      return c && c._data;
-    }));
   };
 
   this.deleteFromNode = function (foundNode, delIdx) {
     if (foundNode.isLeafNode()) {
-      foundNode["delete"](delIdx); // or re-balancing
-
-      return foundNode.getDataCnt() >= getT(_this2.dim) ? null : foundNode;
+      foundNode["delete"](delIdx);
+      if (!foundNode.isUnderflow() || !foundNode.getParent()) return null;
+      return _this2.reBalance(foundNode);
     } else {
       var replacementNode = _this2.getReplacementNode(foundNode, delIdx);
 
-      if (replacementNode) {
-        var node = replacementNode.node,
-            idx = replacementNode.idx;
-        var datum = node.getDatumAt(idx);
-        foundNode.replaceDatum(delIdx, datum);
-
-        _this2.deleteFromNode(node, idx);
-      } else {
-        // merge
-        foundNode["delete"](delIdx); // and merge children
-
-        if (foundNode.isEmpty()) return foundNode.getChildAt(0);
-      }
+      var node = replacementNode.node,
+          idx = replacementNode.idx;
+      var datum = node.getDatumAt(idx);
+      foundNode.replaceDatum(delIdx, datum);
+      return _this2.deleteFromNode(node, idx);
     }
-
-    return null;
   };
+
+  this.reBalance = function (node) {// todo if count of data of sibling >= T Then borrow
+    // todo else merge
+  };
+
+  this.merge = function () {};
+
+  this.borrow = function () {};
 
   this.getChildInfoWith = function (baseNode, getIdx) {
     var node = baseNode;
@@ -443,23 +437,24 @@ var BTree = function BTree() {
   this.getReplacementNode = function (node, datumIdx) {
     var lChildNode = node.getLeftOf(datumIdx);
     var rChildNode = node.getRightOf(datumIdx);
-    var t = getT(_this2.dim);
 
-    if (lChildNode && lChildNode.getDataCnt() > t) {
-      // get max from left child
+    if (lChildNode.getDataCnt() >= rChildNode.getDataCnt()) {
       return _this2.getChildInfoWith(lChildNode, function (node) {
         return node.getDataCnt();
       });
-    }
-
-    if (rChildNode && rChildNode.getDataCnt() > t) {
-      // get min from right child
+    } else {
       return _this2.getChildInfoWith(rChildNode, function () {
         return 0;
       });
-    }
+    } // const t = getT(this.dim);
+    // if (lChildNode && lChildNode.getDataCnt() >= t) { // get max from left child
+    //   return this.getChildInfoWith(lChildNode, (node) => node.getDataCnt());
+    // }
+    // if (rChildNode && rChildNode.getDataCnt() >= t) { // get min from right child
+    //   return this.getChildInfoWith(rChildNode, () => 0);
+    // }
+    // return null;
 
-    return null;
   };
 
   this.print = function () {
