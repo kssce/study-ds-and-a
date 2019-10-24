@@ -20,7 +20,8 @@ var initByNull = function initByNull(list) {
   }
 
   return list;
-};
+}; // get value of underflow threshold.
+
 
 var getT = function getT(dim) {
   return Math.floor(dim / 2);
@@ -210,21 +211,6 @@ var BTreeNode = function BTreeNode() {
     return true;
   };
 
-  this.merge = function (pNode, delIdx, lChildNode, rChildNode) {
-    if (lChildNode.getDataCnt() + rChildNode.getDataCnt > _this._dim) return false;
-    var lDataLen = lChildNode.getDataCnt(),
-        rDataLen = rChildNode.getDataCnt();
-
-    for (var i = 0; i < rDataLen; i++) {
-      lChildNode.setChildAt(lDataLen + i, rChildNode.getChildAt(i));
-      lChildNode.setDatumAt(lDataLen + i, rChildNode.getDatumAt(i));
-    }
-
-    lChildNode.setChildAt(lDataLen + rDataLen, rChildNode.getChildAt(rDataLen));
-    pNode.setRightOf(delIdx, null);
-    return true;
-  };
-
   this["delete"] = function (delIdx) {
     var i = delIdx + 1;
     if (i > _this._dataCnt) return false;
@@ -239,13 +225,11 @@ var BTreeNode = function BTreeNode() {
   };
 
   this.find = function (datum) {
-    // If not found, return idx of _children
     var lowerBound = 0,
         upperBound = _this._dataCnt - 1;
 
     while (lowerBound <= upperBound) {
-      var mid = Math.floor((upperBound + lowerBound) / 2); // Not allowed in other languages
-
+      var mid = Math.floor((upperBound + lowerBound) / 2);
       if (_this.compareTo(_this._data[mid], datum) > 0) upperBound = mid - 1;else if (_this.compareTo(_this._data[mid], datum) < 0) lowerBound = mid + 1;else return {
         idx: mid,
         isNotFound: false
@@ -269,7 +253,7 @@ var BTreeNode = function BTreeNode() {
   this._data = initByNull(Array(M));
   this._children = initByNull(Array(M + 1));
   this._dataCnt = (0, _helper.isNotNull)(rawDatum) ? 1 : 0;
-  this._dim = dim; // dimention of tree
+  this._dim = dim; // dimension of tree
 
   this._data[0] = rawDatum;
   this._children[0] = _left;
@@ -424,7 +408,6 @@ var BTree = function BTree() {
   };
 
   this.reBalance = function (node) {
-    // todo if count of data of sibling >= T Then borrow
     var pNode = node.getParent();
     var idxFromParent = node.getIdxFromParent();
     var rSiblingNode = pNode.getChildAt(idxFromParent + 1);
@@ -437,13 +420,15 @@ var BTree = function BTree() {
       // borrow from right
       return _this2._borrow(node, idxFromParent, _this2._getMin(rSiblingNode));
     } else {
-      // todo else merge
-      // todo recursive merge
-      console.log('merge.');
+      // merge with parent and sibling
+      return _this2._merge(node, idxFromParent, rSiblingNode, lSiblingNode);
     }
   };
 
-  this._merge = function () {};
+  this._merge = function (node, idxFromParent, rSiblingNode, lSiblingNode) {
+    // todo recursive _merge
+    return null;
+  };
 
   this._borrow = function (node, pIdxToBorrow, _ref) {
     var sNodeToBorrow = _ref.node,
@@ -526,7 +511,7 @@ var BTree = function BTree() {
     }
   };
 
-  this.dim = dim; // dimention
+  this.dim = dim; // dimension
 
   this._root = null;
   this.length = 0;
@@ -549,11 +534,4 @@ btree["delete"](1);
 btree["delete"](2);
 btree["delete"](16);
 btree["delete"](17);
-btree.print(); // a.forEach((v) => {
-//   console.log('----------------------------------');
-//   console.log('REMOVING ' + v + ' FROM TREE');
-//   console.log('');
-//
-//   console.assert( btree.remove(v) );
-//   console.log(btree.toString());
-// });
+btree.print();

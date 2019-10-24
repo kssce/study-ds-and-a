@@ -14,6 +14,7 @@ const initByNull = (list) => {
   return list;
 };
 
+// get value of underflow threshold.
 const getT = (dim) => Math.floor(dim / 2);
 
 
@@ -23,16 +24,14 @@ class BTreeNode {
     this._data = initByNull(Array(M));
     this._children = initByNull(Array(M + 1));
     this._dataCnt = isNotNull(rawDatum) ? 1 : 0;
-    this._dim = dim; // dimention of tree
+    this._dim = dim; // dimension of tree
     this._data[0] = rawDatum;
     this._children[0] = left;
     this._children[1] = right;
     this._parent = parent;
     this._idxFromParent = EMPTY;
     this.getMemOf = (datum) => ({ key: datum, val: datum });
-    this.compareTo = (datumA, datumB) => {
-      return this.getMemOf(datumA).key - this.getMemOf(datumB).key;
-    };
+    this.compareTo = (datumA, datumB) => (this.getMemOf(datumA).key - this.getMemOf(datumB).key);
   }
 
   setParent = (parent) => {
@@ -154,22 +153,6 @@ class BTreeNode {
     return true;
   };
 
-  merge = (pNode, delIdx, lChildNode, rChildNode) => {
-    if (lChildNode.getDataCnt() + rChildNode.getDataCnt > this._dim) return false;
-
-    let lDataLen = lChildNode.getDataCnt(), rDataLen = rChildNode.getDataCnt();
-
-    for (let i = 0; i < rDataLen; i++) {
-      lChildNode.setChildAt(lDataLen + i, rChildNode.getChildAt(i));
-      lChildNode.setDatumAt(lDataLen + i, rChildNode.getDatumAt(i));
-    }
-    lChildNode.setChildAt(lDataLen + rDataLen, rChildNode.getChildAt(rDataLen));
-
-    pNode.setRightOf(delIdx, null);
-
-    return true;
-  };
-
   // Delete only if it is a child node.
   delete = (delIdx) => {
     let i = delIdx + 1;
@@ -185,11 +168,12 @@ class BTreeNode {
     return true;
   };
 
-  find = (datum) => { // If not found, return idx of _children
+  // If not found, return idx of _children
+  find = (datum) => {
     let lowerBound = 0, upperBound = this._dataCnt - 1;
 
     while (lowerBound <= upperBound) {
-      const mid = Math.floor((upperBound + lowerBound) / 2); // Not allowed in other languages
+      const mid = Math.floor((upperBound + lowerBound) / 2);
       if (this.compareTo(this._data[mid], datum) > 0) upperBound = mid - 1;
       else if (this.compareTo(this._data[mid], datum) < 0) lowerBound = mid + 1;
       else return { idx: mid, isNotFound: false };
@@ -209,7 +193,7 @@ class BTreeNode {
 
 class BTree {
   constructor (dim = M) {
-    this.dim = dim; // dimention
+    this.dim = dim; // dimension
     this._root = null;
     this.length = 0;
   }
@@ -324,12 +308,10 @@ class BTree {
   };
 
   reBalance = (node) => {
-    // todo if count of data of sibling >= T Then borrow
     const pNode = node.getParent();
     const idxFromParent = node.getIdxFromParent();
     const rSiblingNode = pNode.getChildAt(idxFromParent + 1);
     const lSiblingNode = pNode.getChildAt(idxFromParent - 1);
-
 
     if (lSiblingNode && !lSiblingNode.isUnderflow()) { // borrow from left
       return this._borrow(node, idxFromParent - 1, this._getMax(lSiblingNode));
@@ -337,15 +319,15 @@ class BTree {
     } else if (rSiblingNode && !rSiblingNode.isUnderflow()) { // borrow from right
       return this._borrow(node, idxFromParent, this._getMin(rSiblingNode));
 
-    } else {
-      // todo else merge
-      // todo recursive merge
-      console.log('merge.');
+    } else { // merge with parent and sibling
+      return this._merge(node, idxFromParent, rSiblingNode, lSiblingNode);
     }
   };
 
-  _merge = () => {
+  _merge = (node, idxFromParent, rSiblingNode, lSiblingNode) => {
+    // todo recursive _merge
 
+    return null;
   };
 
   /**
@@ -450,13 +432,3 @@ btree.delete(2);
 btree.delete(16);
 btree.delete(17);
 btree.print();
-
-
-// a.forEach((v) => {
-//   console.log('----------------------------------');
-//   console.log('REMOVING ' + v + ' FROM TREE');
-//   console.log('');
-//
-//   console.assert( btree.remove(v) );
-//   console.log(btree.toString());
-// });
