@@ -110,6 +110,10 @@ var BTreeNode = function BTreeNode() {
     _this._children[idx + 1] = node;
   };
 
+  this.getDataAt = function (idx) {
+    return _this._data[idx];
+  };
+
   this.setChildAt = function (idx, child) {
     if ((0, _helper.isNotExist)(_this._children[idx])) _this._dataCnt++;
     _this._children[idx] = child;
@@ -175,8 +179,8 @@ var BTreeNode = function BTreeNode() {
     _this._idxFromParent = idx;
   };
 
-  this.getIdxFromParent = function (idx) {
-    return _this._idxFromParent = idx;
+  this.getIdxFromParent = function () {
+    return _this._idxFromParent;
   };
 
   this.add = function (datum) {
@@ -225,6 +229,11 @@ var BTreeNode = function BTreeNode() {
     var i = delIdx + 1;
     if (i > _this._dataCnt) return false;
     _this._data[delIdx] = null;
+
+    for (var _i = delIdx; _i < _this._dataCnt; _i++) {
+      _this._data[_i] = _this._data[_i + 1];
+    }
+
     _this._dataCnt--;
     return true;
   };
@@ -395,8 +404,12 @@ var BTree = function BTree() {
 
   this.deleteFromNode = function (foundNode, delIdx) {
     if (foundNode.isLeafNode()) {
+      if (!foundNode.isUnderflow() || !foundNode.getParent()) {
+        foundNode["delete"](delIdx);
+        return null;
+      }
+
       foundNode["delete"](delIdx);
-      if (!foundNode.isUnderflow() || !foundNode.getParent()) return null;
       return _this2.reBalance(foundNode);
     } else {
       var replacementNode = _this2.getReplacementNode(foundNode, delIdx);
@@ -404,30 +417,58 @@ var BTree = function BTree() {
       var node = replacementNode.node,
           idx = replacementNode.idx;
       var datum = node.getDatumAt(idx);
+      console.log('> Datum to delete.', node._data, node._dataCnt, idx, node._children, datum);
       foundNode.replaceDatum(delIdx, datum);
       return _this2.deleteFromNode(node, idx);
     }
   };
 
-  this.reBalance = function (node) {// todo if count of data of sibling >= T Then borrow
-    // todo else merge
+  this.reBalance = function (node) {
+    // todo if count of data of sibling >= T Then borrow
+    var pNode = node.getParent();
+    var idxFromParent = node.getIdxFromParent();
+    var rSiblingNode = pNode.getChildAt(idxFromParent + 1);
+    var lSiblingNode = pNode.getChildAt(idxFromParent - 1);
+
+    if (lSiblingNode && !lSiblingNode.isUnderflow()) {
+      // borrow from left
+      return _this2._borrow(node, idxFromParent - 1, _this2._getMax(lSiblingNode));
+    } else if (rSiblingNode && !rSiblingNode.isUnderflow()) {
+      // borrow from right
+      return _this2._borrow(node, idxFromParent, _this2._getMin(rSiblingNode));
+    } else {
+      // todo else merge
+      // todo recursive merge
+      console.log('merge.');
+    }
   };
 
-  this.merge = function () {};
+  this._merge = function () {};
 
-  this.borrow = function () {};
+  this._borrow = function (node, pIdxToBorrow, _ref) {
+    var sNodeToBorrow = _ref.node,
+        idxForBNode = _ref.idx;
+    var pNode = node.getParent();
+    var datumFromParent = pNode.getDataAt(pIdxToBorrow);
+    node.add(datumFromParent);
+    var sDatumToBorrow = sNodeToBorrow.getDatumAt(idxForBNode);
+    pNode.replaceDatum(pIdxToBorrow, sDatumToBorrow);
+    sNodeToBorrow["delete"](idxForBNode);
+    return null;
+  };
 
-  this.getChildInfoWith = function (baseNode, getIdx) {
+  this.getChildInfoWith = function (baseNode, getChildIdx, getDataIdx) {
     var node = baseNode;
-    var idx = getIdx(node);
+    var idx = getChildIdx(node);
     var cNode = node.getChildAt(idx);
 
     while (cNode) {
       node = cNode;
-      idx = getIdx(node);
+      idx = getChildIdx(node);
       cNode = node.getChildAt(idx);
     }
 
+    idx = getDataIdx(node);
     return {
       node: node,
       idx: idx
@@ -439,22 +480,31 @@ var BTree = function BTree() {
     var rChildNode = node.getRightOf(datumIdx);
 
     if (lChildNode.getDataCnt() >= rChildNode.getDataCnt()) {
-      return _this2.getChildInfoWith(lChildNode, function (node) {
-        return node.getDataCnt();
-      });
+      return _this2._getMax(lChildNode);
     } else {
-      return _this2.getChildInfoWith(rChildNode, function () {
-        return 0;
-      });
-    } // const t = getT(this.dim);
-    // if (lChildNode && lChildNode.getDataCnt() >= t) { // get max from left child
-    //   return this.getChildInfoWith(lChildNode, (node) => node.getDataCnt());
-    // }
-    // if (rChildNode && rChildNode.getDataCnt() >= t) { // get min from right child
-    //   return this.getChildInfoWith(rChildNode, () => 0);
-    // }
-    // return null;
+      return _this2._getMin(rChildNode);
+    }
+  };
 
+  this._getMax = function (baseNode) {
+    var getBiggestChild = function getBiggestChild(node) {
+      return node.getDataCnt();
+    };
+
+    var getBiggestData = function getBiggestData(node) {
+      return node.getDataCnt() - 1;
+    };
+
+    return _this2.getChildInfoWith(baseNode, getBiggestChild, getBiggestData);
+  };
+
+  this._getMin = function (baseNode) {
+    var getSmallestChild = function getSmallestChild() {
+      return 0;
+    };
+
+    var getSmallestData = getSmallestChild;
+    return _this2.getChildInfoWith(baseNode, getSmallestChild, getSmallestData);
   };
 
   this.print = function () {
@@ -482,7 +532,7 @@ var BTree = function BTree() {
   this.length = 0;
 };
 
-var btree = new BTree(M); // const a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20];
+var btree = new BTree(M); // const a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43];
 
 var a1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 var a2 = [4, 2, 7, 1, 5, 3, 8];
@@ -495,7 +545,11 @@ arr.forEach(function (v) {
 console.log(' --- BEFORE REMOVING --- ');
 btree.print();
 console.log('==============================');
-btree["delete"](9); // a.forEach((v) => {
+btree["delete"](1);
+btree["delete"](2);
+btree["delete"](16);
+btree["delete"](17);
+btree.print(); // a.forEach((v) => {
 //   console.log('----------------------------------');
 //   console.log('REMOVING ' + v + ' FROM TREE');
 //   console.log('');

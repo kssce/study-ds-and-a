@@ -30,7 +30,9 @@ class BTreeNode {
     this._parent = parent;
     this._idxFromParent = EMPTY;
     this.getMemOf = (datum) => ({ key: datum, val: datum });
-    this.compareTo = (datumA, datumB) => (this.getMemOf(datumA).key - this.getMemOf(datumB).key);
+    this.compareTo = (datumA, datumB) => {
+      return this.getMemOf(datumA).key - this.getMemOf(datumB).key;
+    };
   }
 
   setParent = (parent) => {
@@ -69,6 +71,8 @@ class BTreeNode {
   getRightOf = (idx) => this._children[idx + 1];
 
   setRightOf = (idx, node) => { this._children[idx + 1] = node; };
+
+  getDataAt = (idx) => this._data[idx];
 
   setChildAt = (idx, child) => {
     if (isNotExist(this._children[idx])) this._dataCnt++;
@@ -125,7 +129,7 @@ class BTreeNode {
 
   setIdxFromParent = (idx) => { this._idxFromParent = idx; };
 
-  getIdxFromParent = (idx) => this._idxFromParent = idx;
+  getIdxFromParent = () => this._idxFromParent;
 
   add = (datum, left = null, right = null) => {
     if (this.isFull()) return false;
@@ -173,31 +177,13 @@ class BTreeNode {
 
     this._data[delIdx] = null;
 
+    for (let i = delIdx; i < this._dataCnt; i++) {
+      this._data[i] = this._data[i + 1];
+    }
     this._dataCnt--;
+
     return true;
   };
-
-  // delete = (delIdx) => {
-  //   let i = delIdx + 1;
-  //   if (i > this._dataCnt) return false;
-  //
-  //   const isMerged = this.merge(this, delIdx, this.getLeftOf(delIdx), this.getRightOf(delIdx));
-  //   if (!isMerged) return false;
-  //
-  //   this._data[delIdx] = null;
-  //
-  //   for (; i < this._dataCnt; i < this._dataCnt) {
-  //     this._data[i - 1] = this._data[i];
-  //     this.setLeftOf(i - 1, this.getLeftOf(i));
-  //   }
-  //
-  //   if (i > delIdx + 1) {
-  //     this.setLeftOf(i - 1, this.getLeftOf(i));
-  //     this.setRightOf(i - 1, null);
-  //   }
-  //   this._dataCnt--;
-  //   return true;
-  // };
 
   find = (datum) => { // If not found, return idx of _children
     let lowerBound = 0, upperBound = this._dataCnt - 1;
@@ -316,16 +302,21 @@ class BTree {
 
   deleteFromNode = (foundNode, delIdx) => {
     if (foundNode.isLeafNode()) {
+
+      if (!foundNode.isUnderflow() || !foundNode.getParent()) {
+        foundNode.delete(delIdx);
+        return null;
+      }
+
       foundNode.delete(delIdx);
-
-      if (!foundNode.isUnderflow() || !foundNode.getParent()) return null;
-
       return this.reBalance(foundNode);
 
     } else {
       const replacementNode = this.getReplacementNode(foundNode, delIdx);
       const { node, idx } = replacementNode;
       const datum = node.getDatumAt(idx);
+
+      console.log('> Datum to delete.', node._data, node._dataCnt, idx, node._children, datum);
 
       foundNode.replaceDatum(delIdx, datum);
       return this.deleteFromNode(node, idx);
@@ -334,34 +325,66 @@ class BTree {
 
   reBalance = (node) => {
     // todo if count of data of sibling >= T Then borrow
+    const pNode = node.getParent();
+    const idxFromParent = node.getIdxFromParent();
+    const rSiblingNode = pNode.getChildAt(idxFromParent + 1);
+    const lSiblingNode = pNode.getChildAt(idxFromParent - 1);
 
-    // todo else merge
+
+    if (lSiblingNode && !lSiblingNode.isUnderflow()) { // borrow from left
+      return this._borrow(node, idxFromParent - 1, this._getMax(lSiblingNode));
+
+    } else if (rSiblingNode && !rSiblingNode.isUnderflow()) { // borrow from right
+      return this._borrow(node, idxFromParent, this._getMin(rSiblingNode));
+
+    } else {
+      // todo else merge
+      // todo recursive merge
+      console.log('merge.');
+    }
   };
 
-  merge = () => {
+  _merge = () => {
 
   };
 
-  borrow = () => {
+  /**
+   * @param node: node with datum to delete
+   * @param pIdxToBorrow: the index of the parent pointed to by node and sNodeToBorrow
+   * @param sNodeToBorrow: siblingNode
+   * @param idxForBNode: data idx in siblingNode
+   * @private
+   */
+  _borrow = (node, pIdxToBorrow, { node: sNodeToBorrow, idx: idxForBNode }) => {
+    const pNode = node.getParent();
+    const datumFromParent = pNode.getDataAt(pIdxToBorrow);
+    node.add(datumFromParent);
 
+    const sDatumToBorrow = sNodeToBorrow.getDatumAt(idxForBNode);
+    pNode.replaceDatum(pIdxToBorrow, sDatumToBorrow);
+    sNodeToBorrow.delete(idxForBNode);
+    return null;
   };
 
   /**
    * get max node info from left child or min node info from right child by getIdx
    * @param baseNode
-   * @param getIdx
+   * @param getChildIdx: for child
+   * @param getDataIdx: for own data
    * @returns {{node: *, idx: *}}
    */
-  getChildInfoWith = (baseNode, getIdx) => {
+  getChildInfoWith = (baseNode, getChildIdx, getDataIdx) => {
     let node = baseNode;
-    let idx = getIdx(node);
+    let idx = getChildIdx(node);
     let cNode = node.getChildAt(idx);
 
     while (cNode) {
       node = cNode;
-      idx = getIdx(node);
+      idx = getChildIdx(node);
       cNode = node.getChildAt(idx);
     }
+
+    idx = getDataIdx(node);
 
     return { node, idx };
   };
@@ -371,20 +394,23 @@ class BTree {
     const rChildNode = node.getRightOf(datumIdx);
 
     if (lChildNode.getDataCnt() >= rChildNode.getDataCnt()) {
-      return this.getChildInfoWith(lChildNode, (node) => node.getDataCnt());
+      return this._getMax(lChildNode);
 
     } else {
-      return this.getChildInfoWith(rChildNode, () => 0);
+      return this._getMin(rChildNode);
     }
+  };
 
-    // const t = getT(this.dim);
-    // if (lChildNode && lChildNode.getDataCnt() >= t) { // get max from left child
-    //   return this.getChildInfoWith(lChildNode, (node) => node.getDataCnt());
-    // }
-    // if (rChildNode && rChildNode.getDataCnt() >= t) { // get min from right child
-    //   return this.getChildInfoWith(rChildNode, () => 0);
-    // }
-    // return null;
+  _getMax = (baseNode) => {
+    const getBiggestChild = (node) => node.getDataCnt();
+    const getBiggestData = (node) => (node.getDataCnt() - 1);
+    return this.getChildInfoWith(baseNode, getBiggestChild, getBiggestData);
+  };
+
+  _getMin = (baseNode) => {
+    const getSmallestChild = () => 0;
+    const getSmallestData = getSmallestChild;
+    return this.getChildInfoWith(baseNode, getSmallestChild, getSmallestData);
   };
 
 
@@ -404,7 +430,7 @@ class BTree {
 }
 
 const btree = new BTree(M);
-// const a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20];
+// const a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43];
 const a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
 const a2 = [4,2,7,1,5,3,8];
 const arr = a1;
@@ -419,7 +445,11 @@ console.log(' --- BEFORE REMOVING --- ');
 btree.print();
 
 console.log('==============================');
-btree.delete(9);
+btree.delete(1);
+btree.delete(2);
+btree.delete(16);
+btree.delete(17);
+btree.print();
 
 
 // a.forEach((v) => {
