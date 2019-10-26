@@ -20,6 +20,4 @@
   - by linked list 
 - A Start by two way
 - B-Tree
-  - insertion
-  - deletion (todo)
 - B+Tree (todo)
