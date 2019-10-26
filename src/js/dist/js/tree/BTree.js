@@ -8,6 +8,14 @@ var _Queue = _interopRequireDefault(require("../basic/Queue"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var M = 4;
@@ -170,6 +178,7 @@ var BTreeNode = function BTreeNode() {
     }
 
     _this._children[len] = children[len] || null;
+    return _this;
   };
 
   this.replaceDatum = function (idx, datum) {
@@ -187,7 +196,7 @@ var BTreeNode = function BTreeNode() {
   this.add = function (datum) {
     var left = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     var right = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    if (_this.isFull()) return false;
+    if (_this.isFull()) return _this;
     var i = _this._dataCnt;
 
     while (i > 0 && _this.compareTo(_this._data[i - 1], datum) > 0) {
@@ -200,28 +209,149 @@ var BTreeNode = function BTreeNode() {
 
     _this._data[i] = datum;
 
-    _this.setLeftOf(i, left);
+    if (left) {
+      _this.setLeftOf(i, left);
 
-    if (left) left.setIdxFromParent(i);
+      left.setIdxFromParent(i);
+    }
 
-    _this.setRightOf(i, right);
+    if (right) {
+      _this.setRightOf(i, right);
 
-    if (right) right.setIdxFromParent(i + 1);
+      right.setIdxFromParent(i + 1);
+    }
+
     _this._dataCnt++;
-    return true;
+    return _this;
   };
 
-  this["delete"] = function (delIdx) {
-    var i = delIdx + 1;
-    if (i > _this._dataCnt) return false;
-    _this._data[delIdx] = null;
+  this.addDatumOnly = function (datum) {
+    if (_this.isFull()) return _this;
+    var i = _this._dataCnt;
 
-    for (var _i = delIdx; _i < _this._dataCnt; _i++) {
-      _this._data[_i] = _this._data[_i + 1];
+    while (i > 0 && _this.compareTo(_this._data[i - 1], datum) > 0) {
+      _this._data[i] = _this._data[i - 1];
+      i--;
+    }
+
+    _this._data[i] = datum;
+    _this._dataCnt++;
+    return _this;
+  };
+
+  this.addChildOnlyByIdx = function (idx, child) {
+    if (_this.isFull() || !child) return _this;
+
+    for (var i = _this._dataCnt; i >= idx; i--) {
+      var currChild = _this._children[i];
+      if (currChild) currChild.setIdxFromParent(i + 1);
+      _this._children[i + 1] = currChild;
+    }
+
+    child.setIdxFromParent(idx);
+    _this._children[idx] = child;
+    return _this;
+  };
+
+  this._initParentOfChildren = function () {
+    _this._children.some(function (child, idx) {
+      if (child === null) return true;
+      child.setParent(_this).setIdxFromParent(idx);
+    });
+  };
+
+  this._getExistDataAndChildren = function () {
+    return {
+      data: _this._data.filter(function (datum) {
+        return datum !== null;
+      }),
+      //slice(0, this._dataCnt),
+      children: _this._children.filter(function (child) {
+        return child !== null;
+      }) //slice(0, this._dataCnt + 1)
+
+    };
+  };
+
+  this._copyWith = function (newData, newChildren, len) {
+    for (var i = 0; i < len; i++) {
+      if (i < len - 1) {
+        var newDatum = newData[i];
+        _this._data[i] = newDatum === undefined ? null : newDatum;
+      }
+
+      var newChild = newChildren[i];
+      _this._children[i] = newChild === undefined ? null : newChild;
+    }
+  };
+
+  this.mergeToLeftNode = function (node) {
+    var _node$_getExistDataAn = node._getExistDataAndChildren(),
+        rData = _node$_getExistDataAn.data,
+        rChildren = _node$_getExistDataAn.children;
+
+    var _this$_getExistDataAn = _this._getExistDataAndChildren(),
+        data = _this$_getExistDataAn.data,
+        children = _this$_getExistDataAn.children;
+
+    var newData = [].concat(_toConsumableArray(data), _toConsumableArray(rData));
+    var newChildren = [].concat(_toConsumableArray(children), _toConsumableArray(rChildren));
+    _this._dataCnt = newData.length;
+
+    _this._copyWith(newData, newChildren, _this._dim + 1);
+
+    _this._initParentOfChildren();
+
+    return _this;
+  };
+
+  this.mergeToRightNode = function (node) {
+    var _node$_getExistDataAn2 = node._getExistDataAndChildren(),
+        lData = _node$_getExistDataAn2.data,
+        lChildren = _node$_getExistDataAn2.children;
+
+    var _this$_getExistDataAn2 = _this._getExistDataAndChildren(),
+        data = _this$_getExistDataAn2.data,
+        children = _this$_getExistDataAn2.children;
+
+    var newData = [].concat(_toConsumableArray(lData), _toConsumableArray(data));
+    var newChildren = [].concat(_toConsumableArray(lChildren), _toConsumableArray(children));
+    _this._dataCnt = newData.length;
+
+    _this._copyWith(newData, newChildren, _this._dim + 1);
+
+    _this._initParentOfChildren();
+
+    return _this;
+  };
+
+  this.deleteDatum = function (delIdx) {
+    if (delIdx + 1 > _this._dataCnt) return _this;
+
+    for (var i = delIdx; i < _this._dataCnt; i++) {
+      var rightData = _this._data[i + 1];
+      _this._data[i] = rightData === undefined ? null : rightData;
     }
 
     _this._dataCnt--;
-    return true;
+    return _this;
+  };
+
+  this.deleteChild = function (delIdx) {
+    var len = _this._dataCnt + 2;
+
+    for (var i = delIdx; i < len; i++) {
+      var rightChild = _this._children[i + 1];
+
+      if ((0, _helper.isNotExist)(rightChild)) {
+        _this._children[i] = null;
+      } else {
+        rightChild.setIdxFromParent(i);
+        _this._children[i] = rightChild;
+      }
+    }
+
+    return _this;
   };
 
   this.find = function (datum) {
@@ -280,6 +410,10 @@ var BTree = function BTree() {
 
   _classCallCheck(this, BTree);
 
+  this.getSize = function () {
+    return _this2._length;
+  };
+
   this.findNode = function (datum) {
     var pNode = null;
     var cIdx = _constant.EMPTY;
@@ -303,16 +437,18 @@ var BTree = function BTree() {
 
   this._split = function (node, pNode) {
     var left = node,
-        right = new BTreeNode(null, null, null, _this2.dim, pNode);
+        right = new BTreeNode(null, null, null, _this2._dim, pNode);
     left.setParent(pNode);
-    var t = getT(_this2.dim);
+    var t = getT(_this2._dim);
     var datumOfChild = left.getDatumAt(t);
     var dividedNode = left.divideBy(t).right; // set with left of splitted node to node. and get splitted right node
 
     if (!dividedNode) return _constant.EMPTY_OBJ;
     var data = dividedNode.data,
         children = dividedNode.children;
-    right.initBy(data, children);
+
+    right.initBy(data, children, pNode)._initParentOfChildren();
+
     return {
       datumOfChild: datumOfChild,
       left: left,
@@ -324,35 +460,35 @@ var BTree = function BTree() {
     var root = _this2._root;
 
     if (!root) {
-      _this2._root = new BTreeNode(rawDatum, null, null, _this2.dim);
+      _this2._root = new BTreeNode(rawDatum, null, null, _this2._dim);
       return;
     }
 
-    var _this2$insertToNode = _this2.insertToNode(rawDatum, root),
-        datumOfChild = _this2$insertToNode.datumOfChild,
-        left = _this2$insertToNode.left,
-        right = _this2$insertToNode.right;
+    var _this2$_insertToNode = _this2._insertToNode(rawDatum, root),
+        datumOfChild = _this2$_insertToNode.datumOfChild,
+        left = _this2$_insertToNode.left,
+        right = _this2$_insertToNode.right;
 
     if ((0, _helper.isNotNull)(datumOfChild)) {
-      _this2._root = new BTreeNode(datumOfChild, left, right, _this2.dim);
+      _this2._root = new BTreeNode(datumOfChild, left, right, _this2._dim);
       left.setParent(_this2._root).setIdxFromParent(0);
       right.setParent(_this2._root).setIdxFromParent(1);
     }
   };
 
-  this.insertToNode = function (rawDatum, node, pNode) {
+  this._insertToNode = function (rawDatum, node, pNode) {
     var foundInfo = node.find(rawDatum);
     if (!foundInfo.isNotFound) return _constant.EMPTY_OBJ;
     var cNode = node.getChildAt(foundInfo.childIdx);
 
     if (node.isLeafNode()) {
       node.add(rawDatum);
-      _this2.length++;
+      _this2._length++;
     } else {
-      var _this2$insertToNode2 = _this2.insertToNode(rawDatum, cNode, node),
-          datumOfChild = _this2$insertToNode2.datumOfChild,
-          left = _this2$insertToNode2.left,
-          right = _this2$insertToNode2.right;
+      var _this2$_insertToNode2 = _this2._insertToNode(rawDatum, cNode, node),
+          datumOfChild = _this2$_insertToNode2.datumOfChild,
+          left = _this2$_insertToNode2.left,
+          right = _this2$_insertToNode2.right;
 
       if ((0, _helper.isNotNull)(datumOfChild)) {
         node.add(datumOfChild, left, right);
@@ -373,41 +509,32 @@ var BTree = function BTree() {
         pNode = foundNode.pNode,
         cIdx = foundNode.cIdx;
 
-    var changedNode = _this2.deleteFromNode(node, idx);
+    var changedRoot = _this2._deleteFromNode(node, idx);
 
-    if (changedNode) {
-      if (pNode) {
-        pNode.setChildAt(cIdx, changedNode);
-      } else {
-        _this2._root = changedNode;
-      }
-    } // console.log('>> P >   ', pNode && pNode._data, pNode && pNode.getChildren().map(c=>c&&c._data));
-    // console.log('>> R >   ', changedNode && changedNode._data, changedNode && changedNode.getChildren().map(c=>c&&c._data));
-
+    if (changedRoot) _this2._root = changedRoot;
   };
 
-  this.deleteFromNode = function (foundNode, delIdx) {
+  this._deleteFromNode = function (foundNode, delIdx) {
     if (foundNode.isLeafNode()) {
       if (!foundNode.isUnderflow() || !foundNode.getParent()) {
-        foundNode["delete"](delIdx);
+        foundNode.deleteDatum(delIdx);
         return null;
       }
 
-      foundNode["delete"](delIdx);
-      return _this2.reBalance(foundNode);
+      foundNode.deleteDatum(delIdx);
+      return _this2._reBalance(foundNode);
     } else {
-      var replacementNode = _this2.getReplacementNode(foundNode, delIdx);
+      var replacementNode = _this2._getNodeToReplace(foundNode, delIdx);
 
       var node = replacementNode.node,
           idx = replacementNode.idx;
       var datum = node.getDatumAt(idx);
-      console.log('> Datum to delete.', node._data, node._dataCnt, idx, node._children, datum);
       foundNode.replaceDatum(delIdx, datum);
-      return _this2.deleteFromNode(node, idx);
+      return _this2._deleteFromNode(node, idx);
     }
   };
 
-  this.reBalance = function (node) {
+  this._reBalance = function (node) {
     var pNode = node.getParent();
     var idxFromParent = node.getIdxFromParent();
     var rSiblingNode = pNode.getChildAt(idxFromParent + 1);
@@ -415,39 +542,76 @@ var BTree = function BTree() {
 
     if (lSiblingNode && !lSiblingNode.isUnderflow()) {
       // borrow from left
-      return _this2._borrow(node, idxFromParent - 1, _this2._getMax(lSiblingNode));
+      var rightChildIdxInLSibling = lSiblingNode.getDataCnt();
+      var rightChildInLSibling = lSiblingNode.getChildAt(rightChildIdxInLSibling);
+      lSiblingNode.deleteChild(rightChildIdxInLSibling);
+      return _this2._borrow(node, idxFromParent - 1, _this2._getMaxCurrNode(lSiblingNode), 0, rightChildInLSibling);
     } else if (rSiblingNode && !rSiblingNode.isUnderflow()) {
       // borrow from right
-      return _this2._borrow(node, idxFromParent, _this2._getMin(rSiblingNode));
+      var leftChildIdxInRSibling = 0;
+      var leftChildInRSibling = rSiblingNode.getChildAt(leftChildIdxInRSibling);
+      rSiblingNode.deleteChild(leftChildIdxInRSibling);
+      var idxToInsertChildrenFromSibling = node.getDataCnt() + 1; // + 1: before borrow from parent
+
+      return _this2._borrow(node, idxFromParent, _this2._getMinCurrNode(rSiblingNode), idxToInsertChildrenFromSibling, leftChildInRSibling);
     } else {
       // merge with parent and sibling
-      return _this2._merge(node, idxFromParent, rSiblingNode, lSiblingNode);
+      return _this2._merge(node, idxFromParent, lSiblingNode, rSiblingNode);
     }
   };
 
-  this._merge = function (node, idxFromParent, rSiblingNode, lSiblingNode) {
-    // todo recursive _merge
-    return null;
+  this._merge = function (node, idxFromParent, lSiblingNode, rSiblingNode) {
+    var pNode = node.getParent();
+    var baseNode = null,
+        parentDatumIdx = null,
+        datumForPNode = null;
+
+    if (lSiblingNode) {
+      parentDatumIdx = idxFromParent - 1;
+      datumForPNode = pNode.getDataAt(parentDatumIdx);
+      lSiblingNode.addDatumOnly(datumForPNode).mergeToLeftNode(node);
+      baseNode = lSiblingNode;
+    } else if (rSiblingNode) {
+      parentDatumIdx = idxFromParent;
+      datumForPNode = pNode.getDataAt(idxFromParent);
+      rSiblingNode.addDatumOnly(datumForPNode).mergeToRightNode(node);
+      baseNode = rSiblingNode;
+    } else {
+      return null;
+    }
+
+    pNode.deleteDatum(parentDatumIdx).deleteChild(idxFromParent);
+
+    if (pNode.isEmpty()) {
+      baseNode.setParent(null).setIdxFromParent(null);
+      return baseNode;
+    } else {
+      var ppNode = pNode.getParent();
+      if (!ppNode) return null; // Case that is root.
+
+      return pNode.isUnderflow() ? _this2._reBalance(pNode) : null;
+    }
   };
 
-  this._borrow = function (node, pIdxToBorrow, _ref) {
+  this._borrow = function (node, pIdxToBorrow, _ref, idxToInsertChildrenFromSibling, childrenFromSibling) {
     var sNodeToBorrow = _ref.node,
         idxForBNode = _ref.idx;
+    if (childrenFromSibling) childrenFromSibling.setParent(node);
     var pNode = node.getParent();
     var datumFromParent = pNode.getDataAt(pIdxToBorrow);
-    node.add(datumFromParent);
+    node.addDatumOnly(datumFromParent).addChildOnlyByIdx(idxToInsertChildrenFromSibling, childrenFromSibling);
     var sDatumToBorrow = sNodeToBorrow.getDatumAt(idxForBNode);
     pNode.replaceDatum(pIdxToBorrow, sDatumToBorrow);
-    sNodeToBorrow["delete"](idxForBNode);
+    sNodeToBorrow.deleteDatum(idxForBNode);
     return null;
   };
 
-  this.getChildInfoWith = function (baseNode, getChildIdx, getDataIdx) {
+  this._getChildInfoWith = function (baseNode, getChildIdx, getDataIdx, findInCurrNodeOnly) {
     var node = baseNode;
     var idx = getChildIdx(node);
     var cNode = node.getChildAt(idx);
 
-    while (cNode) {
+    while (!findInCurrNodeOnly && cNode) {
       node = cNode;
       idx = getChildIdx(node);
       cNode = node.getChildAt(idx);
@@ -460,18 +624,19 @@ var BTree = function BTree() {
     };
   };
 
-  this.getReplacementNode = function (node, datumIdx) {
-    var lChildNode = node.getLeftOf(datumIdx);
-    var rChildNode = node.getRightOf(datumIdx);
+  this._getNodeToReplace = function (node, datumIdx) {
+    var lcNode = node.getLeftOf(datumIdx);
+    var rcNode = node.getRightOf(datumIdx);
+    return lcNode.getDataCnt() >= rcNode.getDataCnt() ? _this2._getMax(lcNode) : _this2._getMin(rcNode);
+  };
 
-    if (lChildNode.getDataCnt() >= rChildNode.getDataCnt()) {
-      return _this2._getMax(lChildNode);
-    } else {
-      return _this2._getMin(rChildNode);
-    }
+  this._getMaxCurrNode = function (baseNode) {
+    return _this2._getMax(baseNode, true);
   };
 
   this._getMax = function (baseNode) {
+    var findInCurrNodeOnly = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
     var getBiggestChild = function getBiggestChild(node) {
       return node.getDataCnt();
     };
@@ -480,16 +645,22 @@ var BTree = function BTree() {
       return node.getDataCnt() - 1;
     };
 
-    return _this2.getChildInfoWith(baseNode, getBiggestChild, getBiggestData);
+    return _this2._getChildInfoWith(baseNode, getBiggestChild, getBiggestData, findInCurrNodeOnly);
+  };
+
+  this._getMinCurrNode = function (baseNode) {
+    return _this2._getMin(baseNode, true);
   };
 
   this._getMin = function (baseNode) {
+    var findInCurrNodeOnly = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
     var getSmallestChild = function getSmallestChild() {
       return 0;
     };
 
     var getSmallestData = getSmallestChild;
-    return _this2.getChildInfoWith(baseNode, getSmallestChild, getSmallestData);
+    return _this2._getChildInfoWith(baseNode, getSmallestChild, getSmallestData, findInCurrNodeOnly);
   };
 
   this.print = function () {
@@ -511,27 +682,48 @@ var BTree = function BTree() {
     }
   };
 
-  this.dim = dim; // dimension
+  this._dim = dim; // dimension
 
   this._root = null;
-  this.length = 0;
+  this._length = 0;
 };
 
-var btree = new BTree(M); // const a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43];
+var btree = new BTree(M);
+var a1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50]; // const a1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
 
-var a1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 var a2 = [4, 2, 7, 1, 5, 3, 8];
 var arr = a1;
-console.log('----------------------------------');
+console.log('--------------------------------------------------------------------');
 arr.forEach(function (v) {
-  console.log('ADDING ' + v + ' TO TREE');
+  console.log('Add ' + v + ' to b-tree');
   btree.insert(v);
 });
-console.log(' --- BEFORE REMOVING --- ');
+console.log(' --- Before removing --- ');
 btree.print();
-console.log('==============================');
+console.log(' --- After removing --- ');
+btree["delete"](5);
+btree["delete"](4);
+btree["delete"](7);
+btree["delete"](8);
+btree["delete"](25);
+btree["delete"](22);
+btree["delete"](21);
+btree["delete"](23);
+btree["delete"](6);
 btree["delete"](1);
+btree["delete"](10);
 btree["delete"](2);
-btree["delete"](16);
+btree["delete"](3);
+btree["delete"](13);
+btree["delete"](11);
+btree["delete"](9);
+btree["delete"](36);
+btree["delete"](35);
+btree["delete"](34);
+btree["delete"](33);
+btree["delete"](32);
+btree["delete"](18);
 btree["delete"](17);
+btree["delete"](19);
+btree["delete"](14);
 btree.print();
