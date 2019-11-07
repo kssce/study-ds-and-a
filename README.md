@@ -18,6 +18,6 @@
 - Dijkstra by one way
   - by array graph
   - by linked list 
-- A Start by two way
+- A Star by two way
 - B-Tree
 - B+Tree (todo)
